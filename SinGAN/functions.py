@@ -13,13 +13,14 @@ from SinGAN.imresize import imresize
 import os
 import random
 from sklearn.cluster import KMeans
-
+import datetime
 
 # custom weights initialization called on netG and netD
 
 def read_image(opt):
     x = img.imread('%s%s' % (opt.input_img,opt.ref_image))
     return np2torch(x)
+
 
 def denorm(x):
     out = (x + 1) / 2
@@ -192,17 +193,31 @@ def save_networks(netG,netD,z,opt):
     torch.save(netD.state_dict(), '%s/netD.pth' % (opt.outf))
     torch.save(z, '%s/z_opt.pth' % (opt.outf))
 
-def adjust_scales2image(real_,opt):
+def adjust_scales2image(real_,opt): #fixed
     #opt.num_scales = int((math.log(math.pow(opt.min_size / (real_.shape[2]), 1), opt.scale_factor_init))) + 1
-    opt.num_scales = math.ceil((math.log(math.pow(opt.min_size / (min(real_.shape[2], real_.shape[3])), 1), opt.scale_factor_init))) + 1
-    scale2stop = math.ceil(math.log(min([opt.max_size, max([real_.shape[2], real_.shape[3]])]) / max([real_.shape[2], real_.shape[3]]),opt.scale_factor_init))
-    opt.stop_scale = opt.num_scales - scale2stop
+    
+    #!opt.num_scales = math.ceil((math.log(math.pow(opt.min_size / (min(real_.shape[2], real_.shape[3])), 1), opt.scale_factor_init))) + 1
+    #!scale2stop = math.ceil(math.log(min([opt.max_size, max([real_.shape[2], real_.shape[3]])]) / max([real_.shape[2], real_.shape[3]]),opt.scale_factor_init))
+    #!opt.stop_scale = opt.num_scales - scale2stop
+
+    #give the true max_size
+    min_size = opt.min_size
+    #print(opt.scaleList)
+    for scale in opt.scaleList :
+        min_size = min_size * (1 / scale)
+    opt.max_size = min_size
+
     opt.scale1 = min(opt.max_size / max([real_.shape[2], real_.shape[3]]),1)  # min(250/max([real_.shape[0],real_.shape[1]]),1)
     real = imresize(real_, opt.scale1, opt)
     #opt.scale_factor = math.pow(opt.min_size / (real.shape[2]), 1 / (opt.stop_scale))
-    opt.scale_factor = math.pow(opt.min_size/(min(real.shape[2],real.shape[3])),1/(opt.stop_scale))
-    scale2stop = math.ceil(math.log(min([opt.max_size, max([real_.shape[2], real_.shape[3]])]) / max([real_.shape[2], real_.shape[3]]),opt.scale_factor_init))
-    opt.stop_scale = opt.num_scales - scale2stop
+    opt.scale_factor = opt.scaleList[0]
+    #scale2stop = math.ceil(math.log(min([opt.max_size, max([real_.shape[2], real_.shape[3]])]) / max([real_.shape[2], real_.shape[3]]),opt.scale_factor_init))
+    opt.stop_scale = opt.train_stages
+    # print("opt.scale1",opt.scale1)
+    # print("stop_scale",opt.stop_scale)
+    # print("scale_factor",opt.scale_factor)
+    # print("real",real.shape)
+
     return real
 
 def adjust_scales2image_SR(real_,opt):
@@ -218,10 +233,12 @@ def adjust_scales2image_SR(real_,opt):
     opt.stop_scale = opt.num_scales - scale2stop
     return real
 
-def creat_reals_pyramid(real,reals,opt):
+def creat_reals_pyramid(real,reals,opt):#fixed
     real = real[:,0:3,:,:]
-    for i in range(0,opt.stop_scale+1,1):
-        scale = math.pow(opt.scale_factor,opt.stop_scale-i)
+    for i in range(opt.stop_scale + 1):
+        scale = 1
+        for j in opt.scaleList[i:] :
+            scale = scale * j
         curr_real = imresize(real,scale,opt)
         reals.append(curr_real)
     return reals
@@ -352,5 +369,6 @@ def dilate_mask(mask,opt):
     plt.imsave('%s/%s_mask_dilated.png' % (opt.ref_dir, opt.ref_name[:-4]), convert_image_np(mask), vmin=0,vmax=1)
     mask = (mask-mask.min())/(mask.max()-mask.min())
     return mask
+
 
 
