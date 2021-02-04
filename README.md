@@ -141,3 +141,4 @@ fake_high_variance folder: random samples starting from n=N for each of the real
 fake_mid_variance folder: random samples starting from n=N-1 for each of the real images 
 
 For additional details please see section 3.1 in our [paper](https://arxiv.org/pdf/1905.01164.pdf)
+# SinGAN_V2_temp
