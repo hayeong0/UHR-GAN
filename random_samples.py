@@ -3,13 +3,14 @@ from SinGAN.manipulate import *
 from SinGAN.training import *
 from SinGAN.imresize import imresize
 import SinGAN.functions as functions
-
+import os
 
 if __name__ == '__main__':
     parser = get_arguments()
-    parser.add_argument('--input_dir', help='input image dir', default='Input/Images')
+    parser.add_argument('--input_dir', help='input image dir', default='./MarbleData')
     parser.add_argument('--input_name', help='input image name', required=True)
     parser.add_argument('--mode', help='random_samples | random_samples_arbitrary_sizes', default='train', required=True)
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     # for random_samples:
     parser.add_argument('--gen_start_scale', type=int, help='generation start scale', default=0)
     # for random_samples_arbitrary_sizes:
@@ -21,6 +22,8 @@ if __name__ == '__main__':
     Zs = []
     reals = []
     NoiseAmp = []
+    opt.scaleList = [0.8,0.8,0.8,0.8,0.75,0.75,0.75,0.65,0.65,0.65,0.65,0.65] #fixed
+    opt.train_stages = len(opt.scaleList)
     dir2save = functions.generate_dir2save(opt)
     if dir2save is None:
         print('task does not exist')
@@ -47,8 +50,3 @@ if __name__ == '__main__':
             Gs, Zs, reals, NoiseAmp = functions.load_trained_pyramid(opt)
             in_s = functions.generate_in2coarsest(reals,opt.scale_v,opt.scale_h,opt)
             SinGAN_generate(Gs, Zs, reals, NoiseAmp, opt, in_s, scale_v=opt.scale_v, scale_h=opt.scale_h)
-
-
-
-
-
