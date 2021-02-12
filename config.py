@@ -10,7 +10,7 @@ def get_arguments():
     #load, input, save configurations:
     parser.add_argument('--netG', default='', help="path to netG (to continue training)")
     parser.add_argument('--netD', default='', help="path to netD (to continue training)")
-    parser.add_argument('--manualSeed', type=int, help='manual seed')
+    parser.add_argument('--manualSeed', type=int, help='manual seed',default=200)
     parser.add_argument('--nc_z',type=int,help='noise # channels',default=3)
     parser.add_argument('--nc_im',type=int,help='image # channels',default=3)
     parser.add_argument('--out',help='output folder',default='Output')
@@ -24,10 +24,10 @@ def get_arguments():
     parser.add_argument('--padd_size',type=int,help='net pad size',default=0)#math.floor(opt.ker_size/2)
         
     #pyramid parameters:
-    parser.add_argument('--scale_factor',type=float,help='pyramid scale factor',default=0.75)#pow(0.5,1/6))
+    parser.add_argument('--scale_factor',type=float,help='pyramid scale factor',default=0.225)#pow(0.5,1/6))
     parser.add_argument('--noise_amp',type=float,help='addative noise cont weight',default=0.1)
-    parser.add_argument('--min_size',type=int,help='image minimal size at the coarser scale',default=25)
-    parser.add_argument('--max_size', type=int,help='image minimal size at the coarser scale', default=250)
+    parser.add_argument('--min_size',type=int,help='image minimal size at the coarser scale',default=34)
+    parser.add_argument('--max_size', type=int,help='image minimal size at the coarser scale', default=200)
 
     #optimization hyper parameters:
     parser.add_argument('--niter', type=int, default=2000, help='number of epochs to train per scale')
