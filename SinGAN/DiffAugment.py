@@ -10,31 +10,34 @@ import cv2
 import matplotlib.pyplot as plt
 from torchvision.utils import save_image
 
-def rand_rotate(x, ratio=0.3):
+def rand_rotate(x, ratio=0.5):
     if ratio > random():
         return x
+
     else:  
-        
-        print("TEST1: ", x)
+        size = [int(i) for i in x.shape]
+        h, w = size[2], size[3]
+        #print("TEST0: ", h, w)
 
-        
-        aug = transforms.Pad(10, padding_mode = 'reflect')
+        aug = transforms.Compose([
+            transforms.Pad(10, padding_mode = 'reflect'),
+            transforms.RandomRotation([0,5], expand=False),
+            transforms.CenterCrop([h,w])
+        ])  
         x = aug(x)
-        print("TEST2: ", x)
+        # aug = transforms.Pad(10, padding_mode = 'reflect')
+        # x = aug(x)
+        # print("TEST2: ", x)
+        # aug = transforms.RandomRotation(10, expand=False)
+        # x = aug(x)
+        # print("TEST3: ", x)
+        # aug = transforms.CenterCrop([h,w])
+        # x = aug(x)
+        # print("SHAPE:", x.shape)
 
-
-        aug = transforms.RandomRotation(10, expand=False)
-        x = aug(x)
-        print("TEST3: ", x)
-
-        aug = transforms.CenterCrop([13,35])
-        x = aug(x)
-        print("SHAPE:", x.shape)
-
-    
-        img = x[0] #torch.Size([3,28,28]
-        # img1 = img1.numpy() # TypeError: tensor or list of tensors expected, got <class 'numpy.ndarray'>
-        save_image(img, 'result.png')
+        # save image
+        #img = x[0] 
+        #save_image(img, 'result.png')
 
         #plt.imshow(x.numpy()[0], cmap='gray')
         #cv2.imwrite("result.png", x)
