@@ -6,16 +6,49 @@ import torch
 import torch.nn.functional as F
 from random import random
 from torchvision import transforms
+import cv2
+import matplotlib.pyplot as plt
+from torchvision.utils import save_image
 
-def rand_rotate(x, ratio=0.5):
+def rand_rotate(x, ratio=0.3):
     if ratio > random():
         return x
     else:  
-        aug = transforms.RandomRotation(10, expand=True)
+        
+        print("TEST1: ", x)
+
+        
+        aug = transforms.Pad(10, padding_mode = 'reflect')
         x = aug(x)
-        #print("TEST: ", x)
+        print("TEST2: ", x)
+
+
+        aug = transforms.RandomRotation(10, expand=False)
+        x = aug(x)
+        print("TEST3: ", x)
+
+        aug = transforms.CenterCrop([13,35])
+        x = aug(x)
+        print("SHAPE:", x.shape)
+
+    
+        img = x[0] #torch.Size([3,28,28]
+        # img1 = img1.numpy() # TypeError: tensor or list of tensors expected, got <class 'numpy.ndarray'>
+        save_image(img, 'result.png')
+
+        #plt.imshow(x.numpy()[0], cmap='gray')
+        #cv2.imwrite("result.png", x)
         return x
 
+def rand_affine(x, ratio=0.5):
+    if ratio > random():
+        return x
+    else:  
+        aug = transforms.RandomAffine(degrees=10, translate=(0.2, 0.2),
+            scale=(0.8, 1.2), shear=15, resample=Image.BILINEAR)
+        x = aug(x)
+        return x
+        
 def DiffAugment(x, policy='rotate', channels_first=True):
     if policy:
         if not channels_first:
@@ -28,14 +61,14 @@ def DiffAugment(x, policy='rotate', channels_first=True):
         x = x.contiguous()
     return x
 
-def rand_hflip(x, ratio=0.5):
+def rand_hflip(x, ratio=0.3):
     if ratio > random():
         return x
     else:
         x = torch.flip(x, dims=(3,))
         return x
 
-def rand_vflip(x, ratio=0.5):
+def rand_vflip(x, ratio=0.2):
     if ratio > random():
         return x
     else:
@@ -99,6 +132,7 @@ AUGMENT_FNS = {
     'vflip': [rand_vflip],
     'hflip': [rand_hflip],
     'rotate': [rand_rotate],
+    'affine' : [rand_affine],
 }
 
 """
